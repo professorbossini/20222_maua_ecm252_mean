@@ -1,5 +1,6 @@
-import { i18nMetaToJSDoc } from '@angular/compiler/src/render3/view/i18n/meta';
-import { Component, EventEmitter, Output } from '@angular/core'
+import { Component} from '@angular/core'
+import { NgForm } from '@angular/forms';
+import { ClienteService } from './cliente.service';
 @Component({
   selector:'app-cliente-inserir',
   templateUrl:'./cliente-inserir.component.html',
@@ -7,18 +8,17 @@ import { Component, EventEmitter, Output } from '@angular/core'
 })
 
 export class ClienteInserirComponent {
-  @Output() clienteAdicionado = new EventEmitter();
+  constructor(public clienteService: ClienteService) {}
 
-  nome: string = "";
-  fone: string = "";
-  email: string = "";
-
-  onAdicionarCliente(){
-    const cliente = {
-      nome: this.nome,
-      fone: this.fone,
-      email: this.email,
-    };
-    this.clienteAdicionado.emit(cliente);
+  onAdicionarCliente(form: NgForm){
+    if (form.invalid){
+      return;
+    }
+    this.clienteService.adicionarCliente(
+      form.value.nome,
+      form.value.fone,
+      form.value.email
+    );
+    form.resetForm();
   }
 }

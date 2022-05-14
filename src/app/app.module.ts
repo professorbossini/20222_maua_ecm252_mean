@@ -12,6 +12,8 @@ import { CabecalhoComponent } from './cabecalho/cabecalho.component';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ClienteListaComponent } from './clientes/cliente-lista/cliente-lista.component';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { ClienteService } from './clientes/cliente.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -28,9 +30,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
     MatCardModule,
     MatButtonModule,
     MatToolbarModule,
-    MatExpansionModule
+    MatExpansionModule,
+    HttpClientModule,
   ],
-  providers: [],
+  providers: [ClienteService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
