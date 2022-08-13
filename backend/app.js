@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require('cors')
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -9,15 +10,17 @@ const {
   MONGODB_USER,
   MONGODB_PASSWORD,
   MONGODB_CLUSTER,
-  MONGODB_DATABASE
+  MONGODB_DATABASE,
+  MONGODB_ADDRESS
 } = process.env
 
-mongoose.connect(`mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER}.mongodb.net/${MONGODB_DATABASE}?retryWrites=true&w=majority`)
+mongoose.connect(`mongodb+srv://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_CLUSTER}.${MONGODB_ADDRESS}.mongodb.net/${MONGODB_DATABASE}?retryWrites=true&w=majority`)
 .then(()=>{
   console.log("Conexão Ok")
 }).catch(()=>{
   console.log("Conexão NOK")
 });
+//aqui estamos especificando um middleware
 app.use(bodyParser.json());
 
 const clientes = [
@@ -35,13 +38,33 @@ const clientes = [
   }
 ]
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', "*");
-  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
-  next();
-})
 
+//não tem bloqueio CORS
+//cliente: http://exemplo.com:7000
+//servidor: http://exemplo.com:7000
+
+//há bloqueio CORS
+//cliente: https://exemplo.com:7000
+//servidor: http://exemplo.com:7000
+
+//há bloqueio CORS
+//cliente: https://exemplo2.com:7000
+//servidor: https://exemplo.com:7000
+
+//há bloqueio CORS
+//cliente: https://exemplo.com:7001
+//servidor: https://exemplo.com:7000
+
+// app.use((req, res, next) => {
+//   res.setHeader('Access-Control-Allow-Origin', "*");
+//   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+//   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS');
+//   next();
+// })
+
+app.use(cors())
+
+//POST http://localhost:3000/api/clientes
 app.post('/api/clientes', (req, res, next) => {
   const cliente = new Cliente({
     nome:req.body.nome,
@@ -53,11 +76,13 @@ app.post('/api/clientes', (req, res, next) => {
   res.status(201).json({mensagem: 'Cliente inserido'});
 });
 
-app.use('/api/clientes', (req, res, next) => {
-  res.status(200).json({
-    mensagem: 'Tudo OK',
-    clientes: clientes
-  });
+app.get('/api/clientes', (req, res) => {
+  Cliente.find().then((documents) => {
+    res.json({
+      mensagem: "Tudo OK",
+      clientes: documents
+    })
+  })
 });
 
 module.exports = app;
